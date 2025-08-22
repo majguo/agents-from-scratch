@@ -1,5 +1,6 @@
 from typing import Literal
-from langchain.chat_models import init_chat_model
+from langchain_openai import AzureChatOpenAI
+import os
 from langchain.tools import tool
 from langgraph.graph import MessagesState, StateGraph, END, START
 from dotenv import load_dotenv
@@ -11,7 +12,13 @@ def write_email(to: str, subject: str, content: str) -> str:
     # Placeholder response - in real app would send email
     return f"Email sent to {to} with subject '{subject}' and content: {content}"
 
-llm = init_chat_model("openai:gpt-4.1", temperature=0)
+llm = AzureChatOpenAI(
+    azure_endpoint=os.environ["AZURE_OPENAI_ENDPOINT"],
+    azure_deployment=os.environ["AZURE_OPENAI_DEPLOYMENT_NAME"],
+    api_version="2024-12-01-preview",
+    api_key=os.environ["AZURE_OPENAI_API_KEY"],
+    temperature=1
+)
 model_with_tools = llm.bind_tools([write_email], tool_choice="any")
 
 def call_llm(state: MessagesState) -> MessagesState:
